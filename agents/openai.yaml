@@ -1,0 +1,4 @@
+interface:
+  display_name: "Critical Agent Critique"
+  short_description: "Read prior agent history and current code, find only severe hallucinated or off-track work, and repair it immediately"
+  default_prompt: "Use $critical-agent-critique-skill to analyze the target repo against its recent commits, current implementation, Codex history, Claude history, and any repo-local notes. Identify only the severe, obvious cases where prior agent work drifted from user intent or repo reality through hallucination, context loss, unrelated over-engineering, or broken guessed implementations. Fix those critical issues immediately and verify the repairs. Ignore low-confidence or cosmetic critique items."
