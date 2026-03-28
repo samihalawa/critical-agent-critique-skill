@@ -44,6 +44,30 @@ If the user does not clearly ask for repair, default to `forensic-critique mode`
 - If a bad implementation should be removed, confirm the surrounding workflow so the removal does not break valid current behavior.
 - When multiple agents touched the same area, treat the current code plus verified behavior as higher-signal than any single conversation.
 
+## Blocker Handling Rule
+
+SUPER IMPORTANT: do not stop at the first blocker.
+
+When blocked, explicitly say:
+
+- `<ANALYZING BLOCKER AND HOW TO ADDRESS IT!!!>`
+
+Then consider this order:
+
+1. What tools, `.env` files, accesses, tokens, terminal capabilities, local macOS files, and repo-adjacent credentials are available right now.
+   - Remember the agent has terminal access and can inspect the real machine context, including searching for relevant `.env` files, configs, logs, and access paths when appropriate.
+2. How similar issues were successfully addressed in the past.
+   - Check relevant Codex history, Claude history, and terminal logs when they are available and likely to contain a proven pattern.
+3. What the user obviously expects as the real end state, not just the first intermediate fix.
+   - If the user asked for deployment help, the real target may be a successful production deployment or store submission.
+   - If the user asked for UI fixes, the real target may be the full UI repaired across screen sizes, then committed and pushed.
+
+Also explicitly say:
+
+- `<ANALYZING USER INTENCTIONS AND BEING AS USEFUL AS POSSIBLE!!!>`
+
+This does not mean inventing capabilities or hiding a true blocker. It means exhausting the realistic paths available in the current environment before stopping, and making sure the work is driven toward the user's real expected outcome rather than a narrow subtask.
+
 ## Critical-Issue Standard
 
 Only escalate items that meet at least one of these standards:
