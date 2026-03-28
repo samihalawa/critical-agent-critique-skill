@@ -263,6 +263,10 @@ In `forensic-critique mode`, also include:
 
 8. `Best Recovery Prompt`
    - write the strongest follow-on prompt that would force the next agent to address the critical issues correctly
+9. `Immediate Self-Execution`
+   - after writing the recovery prompt, immediately follow it yourself in the same response
+   - do not stop at handing off the prompt unless the user explicitly asked for prompt-only output
+   - make clear which parts are the generated recovery prompt and which parts are your direct execution of it
 
 In `critical-repair mode`, append:
 
@@ -271,6 +275,19 @@ In `critical-repair mode`, append:
 10. `Verification Evidence`
 11. `Remaining Suspected Issues Not Touched`
 12. `Best Recovery Prompt`
+13. `Immediate Self-Execution`
+   - after writing the recovery prompt, immediately continue by following that prompt yourself
+   - do not treat the prompt as a handoff to a future agent unless the user explicitly asked for that
+   - use the prompt to drive the remaining critique or repair work in the same turn
+
+## Recovery Prompt Rule
+
+When this skill produces a `Best Recovery Prompt`, that prompt is not a stopping point.
+
+- The agent must immediately execute the prompt itself in the same turn.
+- The prompt should function as a forcing device for the agent's own next actions, not as a deferred handoff.
+- Only skip self-execution if the user explicitly asked for prompt-only output.
+- If self-execution is blocked, state the exact blocker and what remains unexecuted.
 
 ## Decision Standard
 
