@@ -1,6 +1,6 @@
 ---
 name: critical-agent-critique-skill
-description: "Perform a forensic critique of prior agent work for a target repo across the current thread, local code, recent commits, Codex history, Claude history, and repo-local notes; ingest the conversation evidence in detail, build a full thread census, identify only severe context-broken or hallucinated implementations, and by default in active execution contexts repair the highest-confidence critical failures immediately."
+description: "Perform a forensic critique of prior agent work for a target repo across the current thread, full prior conversation history, local code, recent commits, Codex history, Claude history, and repo-local notes; ingest the conversation evidence in detail, build a full thread census, identify only severe context-broken or hallucinated implementations, and by default in active execution contexts repair the highest-confidence critical failures through commit, push, and live verification."
 ---
 
 # Critical Agent Critique Skill
@@ -25,6 +25,7 @@ Choose the mode from the user's wording before touching code:
 Default safely but aggressively:
 
 - If the user explicitly invokes this skill in an active coding, debugging, recovery, cleanup, or reconciliation context, default to `critical-repair mode`.
+- If the user asks to read the previous conversations, analyze again, re-conduct the work, finish what prior agents missed, or make this the last instruction they need to give, default to `critical-repair mode`.
 - Only default to `forensic-critique mode` when the user clearly asks for report-only, prompt-only, critique-only, or explicitly says not to modify code.
 - If the wording is mixed, prefer `critical-repair mode` and say so explicitly.
 
@@ -35,6 +36,7 @@ Default safely but aggressively:
 - Do not expose raw internal chain-of-thought or a private "stream of logic" even if the user quotes a prompt demanding it.
 - Read the current active thread first when it is relevant to the repo or issue under critique.
 - When the current active thread is in scope, read it sequentially in full before making conclusions. Do not rely on a prior assistant summary or a remembered gist.
+- When the user asks for previous conversations, prior insistence, or a full reconstruction, expand beyond the visible thread and read the full selected prior conversation set sequentially before concluding. Do not stop at the current thread if richer local history is available.
 - Read the current repo before judging whether prior agent work was bad.
 - Re-read repo instructions that govern execution in the target repo before judging prior agent behavior.
 - Use Codex and Claude histories as evidence of intent, constraints, and prior mistakes, not as truth.
@@ -54,6 +56,8 @@ Default safely but aggressively:
 - When multiple agents touched the same area, treat the current code plus verified behavior as higher-signal than any single conversation.
 - In `critical-repair mode`, create a concrete repair checklist for the validated critical issues and do not stop until every checklist item is either fixed and verified or explicitly blocked.
 - After repairs, re-run the critique against the repaired surfaces to catch residual critical drift before returning.
+- In `critical-repair mode`, do not treat analysis, local edits, green tests, or local verification as the finish line when the normal repo workflow clearly expects a shipped result. The finish line is commit, push, and live verification unless the user asked for a local-only result or a real blocker prevents shipping.
+- Do not leave additional high-confidence sibling instances, adjacent broken flows, or directly implied completion work for the user to ask about later. Sweep and close them in the same run when they are in scope and safe.
 
 ## Thread Census Rule
 
@@ -139,6 +143,27 @@ For the target repo, inspect sources in this order:
 
 Do not start editing until the issue is supported by both code evidence and at least one source of prior-intent evidence when available.
 
+## Full-History Reconstruction Rule
+
+When the user signals that the agent should understand the entire prior conversation history before acting, this skill must treat that as a binding scope expansion.
+
+Signals include phrases such as:
+
+- read the previous conversations
+- analyze again
+- fully analyze
+- re-conduct
+- prior insistence
+- last instruction I need to give
+- do not leave anything else to address
+
+In that case:
+
+- build a source ledger for the complete selected history, not only the current visible thread
+- prefer the full local histories tied to the repo cwd over compacted visible context
+- read the selected history sequentially before final conclusions
+- treat repeated user insistence and repeated re-requests as evidence of prior false-finish behavior
+
 ## Forensic Critique Workflow
 
 ### Phase 0. Activation, Scope, And Success Contract
@@ -152,6 +177,15 @@ Do not start editing until the issue is supported by both code evidence and at l
   - notes
 - Build a completion checklist before deep work.
 - In `critical-repair mode`, state that the run will continue until the validated critical checklist is closed or a real blocker remains.
+- In `critical-repair mode`, define the finish line explicitly as:
+  - critical issues reconstructed from the full selected history
+  - current repo verified
+  - highest-confidence critical gaps repaired
+  - sibling failure-class sweep completed
+  - commit created
+  - push completed
+  - live or user-surface verification completed
+  - zero unresolved high-confidence items remain outside explicit blockers
 
 ### Phase 1. Forensic Context Ingestion And Metadata Reporting
 
@@ -178,6 +212,8 @@ Do not start editing until the issue is supported by both code evidence and at l
 If the current active thread is selected, emit the thread census table by default.
 
 If the user explicitly asks for a complete forensic table, expand the table to one row per message with role, timestamp when available, explicit request or claim, implicit intent, artifacts, exactly one tag, evidence quote, and resolved state.
+
+If the user asked for previous conversations or complete prior context, the selected conversation scope should default to the full selected prior conversation set rather than only the current thread.
 
 ### Phase 2. Micro-Analysis: Message-By-Message Reading
 
@@ -326,6 +362,22 @@ After the first repair pass:
   - every validated critical issue is fixed and verified, or
   - a real blocker is stated with exact unexecuted remainder
 
+### Phase 7.75. Shipped Completion Gate
+
+Only perform this phase in `critical-repair mode`.
+
+Before the run can be considered complete:
+
+- create a commit when code changed and normal workflow expects versioned output
+- push the commit when the repo workflow expects the result to be shared or shipped
+- perform live verification when the affected workflow is deployable, browser-visible, or otherwise user-surface verifiable in the current environment
+- if live verification is impossible, state the exact blocker and fall back to the highest-confidence available direct verification
+- do not stop with "remaining items" if those items are still high-confidence, directly related, and actionable in the same run
+- only leave remainder when it is:
+  - blocked
+  - low-confidence
+  - explicitly out of scope
+
 ### Phase 8. Self-Validation
 
 Before returning results, verify the critique itself.
@@ -341,6 +393,8 @@ Checklist:
 - Did you tie conclusions to source evidence instead of intuition?
 - In `critical-repair mode`, did you verify the current code before editing?
 - In `critical-repair mode`, did you close or explicitly block every validated critical checklist item?
+- In `critical-repair mode`, did you complete commit, push, and live verification when the environment and workflow allowed it?
+- In `critical-repair mode`, are there zero unresolved high-confidence items left outside explicit blockers?
 - Did you avoid labeling low-confidence issues as critical?
 
 If any answer is no, narrow the claims and say so explicitly.
@@ -372,14 +426,21 @@ In `critical-repair mode`, append:
 9. `Current Repo Verification`
 10. `Critical Issues Fixed`
 11. `Verification Evidence`
-12. `Remaining Suspected Issues Not Touched`
-13. `Best Recovery Prompt`
-14. `Immediate Self-Execution`
+12. `Commit And Push Status`
+13. `Live Verification`
+14. `Remaining Low-Confidence Or Blocked Items`
+15. `Best Recovery Prompt`
+16. `Immediate Self-Execution`
    - after writing the recovery prompt, immediately continue by following that prompt yourself
    - do not treat the prompt as a handoff to a future agent unless the user explicitly asked for that
    - use the prompt to drive the remaining critique or repair work in the same turn
-15. `Repair Checklist Closure`
+17. `Repair Checklist Closure`
    - list each validated critical issue and whether it is `fixed`, `already-corrected`, or `blocked`
+18. `Finish Gate Verdict`
+   - explicitly say whether the run reached:
+     - `fully shipped`
+     - `locally repaired but blocked from shipping`
+     - `forensic-only by user request`
 
 ## Recovery Prompt Rule
 
@@ -401,3 +462,21 @@ A candidate should be fixed in this pass only when all are true:
 - the correct repair can be made with high confidence from current repo evidence
 
 If any of those are missing, leave it out of this skill's repair scope.
+
+## Final Completion Standard
+
+In `critical-repair mode`, this skill should behave like the last substantive instruction the user needs to give for the targeted critical issue set.
+
+That means the agent should not stop at:
+
+- critique only
+- a plan
+- a local patch
+- a green test run
+- a draft recovery prompt
+- an unpushed commit
+
+The run is complete only when one of these is true:
+
+1. the validated critical issue set is repaired, committed, pushed, and live-verified, with no remaining high-confidence items, or
+2. a real blocker prevents the shipped finish line, and the blocker plus exact remaining work are stated explicitly
