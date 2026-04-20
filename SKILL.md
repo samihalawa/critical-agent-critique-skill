@@ -49,6 +49,7 @@ Default safely but aggressively:
 - Do not open a giant speculative cleanup backlog.
 - Ignore minor style drift, harmless duplication, or debatable design choices.
 - A change qualifies only if it clearly shows hallucination, loss of context, or severe off-track execution.
+- Explicitly detect when the agent had already found a working or clearly superior path, but then drifted into worse alternative approaches anyway.
 - Verify that a suspected issue is still present in the current code before touching it.
 - If prior agent work looks wrong but the current code is already corrected, critique it but do not reopen it as an implementation target.
 - Prefer direct repair over long reports only in `critical-repair mode`.
@@ -120,6 +121,29 @@ Do not treat these as critical by default:
 - low-risk dead code unless it actively causes confusion or breakage
 - imperfect abstractions that still match the real feature
 - missing polish that does not distort the requested workflow
+
+## Cognitive-Failure Audit Rule
+
+This skill must explicitly check for high-signal coding-agent anti-patterns, especially when the thread contains repeated retries, rewrites, or user frustration.
+
+Required checks:
+
+- `solution path graph`
+  - list the distinct technical approaches attempted
+  - note whether the agent converged, looped, or abandoned a better path
+- `hallucination and reality audit`
+  - flag non-existent imports, APIs, methods, libraries, runtime assumptions, or fictional integration paths
+- `over-engineering smell audit`
+  - detect when the agent built a custom parser, wrapper, architecture layer, or factory flow where a simpler built-in or existing repo pattern was available
+- `memory and coherence audit`
+  - mark regression events where the agent reverted to a previously broken state
+  - mark `abandoned success` where the user or repo evidence already showed a working path, but the agent still rewrote or replaced it
+  - mark `library amnesia` where the agent ignored an already-known standard library, existing ecosystem solution, or previously discovered repo-native solution
+  - mark `solution looping` where the agent rotates between approaches instead of converging
+- `simplest working alternative`
+  - for each serious incident, state the simplest working alternative the agent missed or abandoned
+
+If the agent already had the solution in hand and still drifted away from it, treat that as a major critique signal even if the later attempts were technically plausible.
 
 ## Required Source Order
 
@@ -270,6 +294,8 @@ Recommended themes:
 - verification quality
 - instruction loss
 - agent trust failures
+- cognitive failures
+- solution looping and abandoned success
 
 For each theme, answer:
 
@@ -278,6 +304,15 @@ For each theme, answer:
 - which constraints were lost
 - whether the repo ever matched the claims
 - what the root cause was
+
+Also classify the root cause when applicable:
+
+- `OVER-ENGINEERING`
+- `LIBRARY AMNESIA`
+- `API HALLUCINATION`
+- `SOLUTION LOOPING`
+- `ABANDONED SUCCESS`
+- `REGRESSION TO BROKEN STATE`
 
 ### Phase 4. Comprehensive Problem Identification
 
@@ -308,6 +343,11 @@ For each problem, capture:
 - whether it is still present now
 - why it qualifies as critical or does not
 
+When relevant, also record:
+
+- the simpler working alternative
+- the exact message, turn, or code moment where the agent ignored the better path
+
 ### Phase 5. Analytical Protocol
 
 In `forensic-critique mode`:
@@ -315,6 +355,7 @@ In `forensic-critique mode`:
 - never write code
 - stay strictly analytical
 - base conclusions only on the provided text plus verifiable current repo evidence
+- do not just describe the bad path; identify the simplest working path the agent should have stayed on
 
 In `critical-repair mode`:
 
@@ -411,6 +452,14 @@ Unless the user requests a different format, return:
 6. `Critique of Agent Behavior`
 7. `Strategic Recommendations`
 8. `Success Criteria`
+
+When the selected scope contains substantial coding-agent drift, also include:
+
+- `Solution Path Graph`
+- `Hallucination & Over-Engineering Incidents`
+  - table: timestamp or turn | incident | why it is wrong | simpler alternative
+- `Regression & Amnesia Timeline`
+  - include regression-to-broken-state, abandoned-success, and loop events
 
 In `forensic-critique mode`, also include:
 
