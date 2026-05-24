@@ -109,6 +109,7 @@ Only escalate items that meet at least one of these standards:
 - invents flows, data, APIs, or UI states that do not exist in the repo or product
 - breaks a working workflow because the agent forced a guessed architecture
 - adds severe over-engineering that blocks or distorts the intended feature
+- adds a permanent gate, disabled state, hidden option, unavailable label, or rotation removal from one transient failure instead of proving the limitation across independent evidence layers
 - contradicts explicit user constraints from conversation history
 - claims completion while leaving an obviously broken or disconnected implementation
 - wires code that cannot possibly work in the current stack, config, or runtime model
@@ -135,6 +136,10 @@ Required checks:
   - flag non-existent imports, APIs, methods, libraries, runtime assumptions, or fictional integration paths
 - `over-engineering smell audit`
   - detect when the agent built a custom parser, wrapper, architecture layer, or factory flow where a simpler built-in or existing repo pattern was available
+- `anti-gate audit`
+  - flag any code path where one 403, 429, 500, timeout, empty result, selector miss, or failed tool attempt became a permanent product gate
+  - verify whether the agent tried at least 3 distinct approaches and used at least 2 source layers before disabling, hiding, marking unavailable, or removing something from rotation
+  - prefer logging/reporting the transient failure over encoding the diagnosis into user-facing state
 - `memory and coherence audit`
   - mark regression events where the agent reverted to a previously broken state
   - mark `abandoned success` where the user or repo evidence already showed a working path, but the agent still rewrote or replaced it
