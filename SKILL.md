@@ -319,6 +319,16 @@ Also classify the root cause when applicable:
 - `ABANDONED SUCCESS`
 - `REGRESSION TO BROKEN STATE`
 
+### Claim-Reversal Gate
+
+For every severe claim, require an assertion fingerprint:
+
+`actor/counterparty + organization + opportunity/asset/requisition/case + channel + native ID + event time + source + proof layer`
+
+Reject a critique conclusion when it merges cases only by organization, domain, contact, subject, role title, or CRM label. Mark each conclusion `historical observation`, `current state`, or `current unknown`; historical artifacts, drafts, stale calendar entries, CRM notes, and prior dashboards cannot establish current state without newer decisive evidence. A freshly read calendar record can prove only its own scheduled or accepted meeting state, never attendance, completion, delivery, or outcome.
+
+When the prior agent later corrects itself, audit propagation rather than treating the admission as closure. The critique must show the original claim, reversal evidence, every dependent count/value/ranking/recommendation, and whether all were withdrawn and recomputed. A stale dashboard with an appended correction is an unresolved critical failure.
+
 ### Phase 4. Comprehensive Problem Identification
 
 Build a problem inventory with these buckets:
