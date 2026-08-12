@@ -37,8 +37,9 @@ intent, not a stale plan or prior claim. Inspect primary evidence when needed. C
 - preserved unrelated user work and stated unresolved proof honestly.
 
 Git freshness rule: refs/remotes/*, origin/*, and objects available to `git show` are local cache unless a
-current fetch succeeded in this review. Never infer that a remote commit, push, branch, or release is absent
-only because the local clone lacks its object or its origin-tracking ref is behind. When local Git conflicts
+current fetch succeeded in this review for the exact provider, ref, and SHA being evaluated.
+Never infer that a remote commit, push, branch, or release is absent only because the local clone lacks its
+object or its origin-tracking ref is behind. When local Git conflicts
 with current provider/API/read-back evidence in the transcript, verify the provider state directly when a
 provider tool is available and prefer that current evidence. Keep `remote-shipped` and
 `local-clone-synced` as separate proof states; report a stale clone as such instead of reversing a proven
