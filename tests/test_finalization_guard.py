@@ -76,6 +76,14 @@ class GuardTests(unittest.TestCase):
         self.assertEqual(command[command.index("--disable") + 1], "hooks")
         self.assertEqual(command[command.index("--sandbox") + 1], "read-only")
 
+    def test_reviewer_separates_remote_shipment_from_stale_local_refs(self):
+        instructions = guard.REVIEW_INSTRUCTIONS
+        self.assertIn("current fetch succeeded", instructions)
+        self.assertIn("Never infer that a remote commit", instructions)
+        self.assertIn("remote-shipped", instructions)
+        self.assertIn("local-clone-synced", instructions)
+        self.assertIn("prefer that current evidence", instructions)
+
     def test_verdict_parser_requires_first_nonempty_line(self):
         self.assertEqual(guard._parse_verdict("\nPASS: good"), ("pass", "good"))
         self.assertEqual(guard._parse_verdict("REVISE: gap"), ("revise", "gap"))
