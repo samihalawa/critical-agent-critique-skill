@@ -329,6 +329,23 @@ Reject a critique conclusion when it merges cases only by organization, domain, 
 
 When the prior agent later corrects itself, audit propagation rather than treating the admission as closure. The critique must show the original claim, reversal evidence, every dependent count/value/ranking/recommendation, and whether all were withdrawn and recomputed. A stale dashboard with an appended correction is an unresolved critical failure.
 
+### Desired-State Authority Audit
+
+For every proposed or completed create, delete, repoint, rename, repair, or
+publication of an external resource or product surface, record both:
+
+- observed-state evidence; and
+- positive desired-state authority.
+
+Desired-state authority must trace to current user wording, canonical product
+configuration, or canonical deployment source. Historical DNS, redirects,
+certificates, cached pages, browser renders, traffic, provider objects, old
+docs, screenshots, and prior agent claims prove observation only. They cannot
+define the intended architecture. If the agent or an earlier critic supplied a
+target as an assumption without this positive source, classify the target as
+unauthorized or current unknown and audit every dependent mutation and claim.
+Repair the owning decision gate as well as the single bad instance.
+
 ### Phase 4. Comprehensive Problem Identification
 
 Build a problem inventory with these buckets:
@@ -452,6 +469,8 @@ Checklist:
 - In `critical-repair mode`, did you complete commit, push, and live verification when the environment and workflow allowed it?
 - In `critical-repair mode`, are there zero unresolved high-confidence items left outside explicit blockers?
 - Did you avoid labeling low-confidence issues as critical?
+- For every external target mutation, did you separate observed state from a
+  cited positive desired-state authority source?
 
 If any answer is no, narrow the claims and say so explicitly.
 
