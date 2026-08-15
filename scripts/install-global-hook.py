@@ -80,7 +80,7 @@ def _hooks_document(existing: bytes | None, codex_home: Path, python: Path) -> b
                     "type": "command",
                     "command": command,
                     "timeout": 240,
-                    "statusMessage": "Running independent finish critic",
+                    "statusMessage": "Running bounded finish critic (max 2 passes)",
                 }
             ]
         }
